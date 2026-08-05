@@ -1,2 +1,5 @@
-# english-grammar-quiz
-Console-based English Grammar Quiz app in Python &amp; SQLite with performance analytics — tracks accuracy by category/difficulty to highlight weak grammar areas.
+English Grammar Quiz — with Performance Analytics
+
+Status: In Progress (Phase 1 — Database Setup)
+
+A console-based English Grammar Quiz application built with Python and SQLite, developed as a portfolio project to demonstrate database design, Python , and data-driven analytics — not a full production app.
