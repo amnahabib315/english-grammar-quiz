@@ -1,5 +1,4 @@
 import sqlite3
-
 def create_tables():
     conn = sqlite3.connect("quiz.db")
     cursor = conn.cursor()
@@ -30,12 +29,9 @@ def create_tables():
             FOREIGN KEY (question_id) REFERENCES questions(id)
         )
     """)
-
     conn.commit()
     conn.close()
     print("Tables created successfully.")
-
-
 def insert_sample_questions():
     conn = sqlite3.connect("quiz.db")
     cursor = conn.cursor()
@@ -53,12 +49,9 @@ def insert_sample_questions():
         (question, option_a, option_b, option_c, option_d, correct_option, category, difficulty)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     """, sample_questions)
-
     conn.commit()
     conn.close()
     print(f"{len(sample_questions)} sample questions inserted.")
-
-
 if __name__ == "__main__":
     create_tables()
     insert_sample_questions()
