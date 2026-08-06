@@ -26,3 +26,22 @@ class Question:
             return False
 q=Question(1,"She ___ to school every day.", "go", "goes", "going", "gone", "b", "Tenses", "easy")
 q.check_answer()
+
+class Quiz:
+    def __init__(self,questions):
+        self.questions=questions
+        self.score=0
+        self.total=len(self.questions)
+        self.category_results = {}
+    def run(self):
+        i=0
+        for i,q in enumerate(self.questions,start=1):
+            print(f"{i}. {q.question}")
+            print(f"a. {q.option_a}")
+            print(f"b. {q.option_b}")
+            print(f"c. {q.option_c}")
+            print(f"d. {q.option_d}")
+            Q=q.check_answer()
+            if Q:
+                self.score+=1
+
