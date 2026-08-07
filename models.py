@@ -48,12 +48,21 @@ class Quiz:
             self.category_results[category]["total"] += 1
             if Q:
                 self.category_results[category]["correct"] += 1
+
     def show_summary(self):
         print(f"\nFinal Score: {self.score}/{self.total}")
         print("\nCategory Breakdown:")
+        weak_categories = []
         for category, results in self.category_results.items():
-            print(f"  {category}: {results['correct']}/{results['total']}")
-
+            accuracy = results['correct'] / results['total']
+            if accuracy < 0.6:
+                print(f"  {category}: {results['correct']}/{results['total']} needs practice")
+                weak_categories.append(category)
+            else:
+                print(f"  {category}: {results['correct']}/{results['total']}")
+        if not weak_categories:
+            print("\nGreat job! No major weak areas this session.")
+        
 if __name__ == "__main__":
     sample_questions = [
         (1, "She ___ to school every day.", "go", "goes", "going", "gone", "b", "Tenses", "easy"),
