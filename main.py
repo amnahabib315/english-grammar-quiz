@@ -8,13 +8,12 @@ def get_questions(db, difficulty, categories, count):
     if len(categories) == 0:
         # "all" was chosen — no category filter, so only 2 placeholders needed:
         # one for difficulty, one for the LIMIT count.
-        query = "SELECT * FROM questions WHERE difficulty = ? LIMIT ?"
+        query = "SELECT * FROM questions WHERE difficulty = ? ORDER BY RANDOM() LIMIT ?"
         params = (difficulty, count)
     else:
         # Build exactly as many '?' as there are categories chosen
         placeholders = ", ".join(["?"] * len(categories))
-
-        query = f"SELECT * FROM questions WHERE difficulty = ? AND category IN ({placeholders}) LIMIT ?"
+        query = f"SELECT * FROM questions WHERE difficulty = ? AND category IN ({placeholders}) ORDER BY RANDOM() LIMIT ?"
         #placeholder get fills from this params when db.cursor.execute runs
 #*categories is used to unpcak tuple
         params = (difficulty, *categories, count)
@@ -102,8 +101,19 @@ def main():
     print(f"\nStarting quiz with {len(questions)} questions...\n")
     quiz = Quiz(questions)
     quiz.run()
-    quiz.show_summary()
+    from datetime import date
 
+    def log_attempts(db, quiz):
+        today = str(date.today())
+        for attempt in quiz.attempt_log:
+            db.cursor.execute("""
+            INSERT INTO attempts (date, category, difficulty, question_id, is_correct)
+            VALUES (?, ?, ?, ?, ?)
+        """, (today, attempt["category"], attempt["difficulty"], attempt["question_id"], attempt["is_correct"]))
+        db.conn.commit()
+        print(f"\n{len(quiz.attempt_log)} attempts logged to database.")
+    quiz.show_summary()
+    log_attempts(db, quiz)
     db.close()
 
 

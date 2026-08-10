@@ -26,6 +26,7 @@ class Question:
             return False
 class Quiz:
     def __init__(self,questions):
+        self.attempt_log = []
         self.questions=questions
         self.score=0
         self.total=len(self.questions)
@@ -48,6 +49,12 @@ class Quiz:
             self.category_results[category]["total"] += 1
             if Q:
                 self.category_results[category]["correct"] += 1
+            self.attempt_log.append({
+    "question_id": q.id,
+    "category": category,
+    "difficulty": q.difficulty,
+    "is_correct": 1 if Q else 0
+})
 
     def show_summary(self):
         print(f"\nFinal Score: {self.score}/{self.total}")
