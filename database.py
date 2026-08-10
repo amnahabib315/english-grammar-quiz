@@ -32,15 +32,38 @@ class Database:
         """)
 
         print("Tables created successfully.")
-
     def insert_sample_questions(self):
         sample_questions = [
-            ("She ___ to school every day.", "go", "goes", "going", "gone", "b", "Tenses", "easy"),
-            ("They ___ watching a movie right now.", "is", "am", "are", "was", "c", "Tenses", "easy"),
-            ("Choose the noun: 'The dog ran quickly.'", "ran", "quickly", "dog", "the", "c", "Parts of Speech", "easy"),
-            ("Choose the correct sentence:", "He go to market.", "He goes to market.", "He going to market.", "He gone to market.", "b", "Subject-Verb Agreement", "easy"),
-            ("Choose the correct word: 'Their/There/They're going home.'", "Their", "There", "They're", "There's", "c", "Common Errors", "easy"),
-        ]
+    # ---- EASY ----
+    ("She ___ to school every day.", "go", "goes", "going", "gone", "b", "Tenses", "easy"),
+    ("They ___ watching a movie right now.", "is", "am", "are", "was", "c", "Tenses", "easy"),
+    ("Choose the noun: 'The dog ran quickly.'", "ran", "quickly", "dog", "the", "c", "Parts of Speech", "easy"),
+    ("Choose the verb: 'She sings beautifully.'", "she", "sings", "beautifully", "the", "b", "Parts of Speech", "easy"),
+    ("Choose the correct sentence: ____ to market or He goes to market?", "He go to market.", "He goes to market.", "He going to market.", "He gone to market.", "b", "Subject-Verb Agreement", "easy"),
+    ("Choose the correct sentence: They walks fast or They walk fast?", "They walks fast.", "They walk fast.", "They walking fast.", "They walked fast.", "b", "Subject-Verb Agreement", "easy"),
+    ("Choose the correct word: '____ going home.'", "Their", "There", "They're", "There's", "c", "Common Errors", "easy"),
+    ("Choose the correct word: '____ raining outside.'", "Its", "It's", "It'", "Its's", "b", "Common Errors", "easy"),
+
+    # ---- MEDIUM ----
+    ("By next year, she ___ her degree.", "completes", "will complete", "will have completed", "completed", "c", "Tenses", "medium"),
+    ("She ___ dinner when the phone rang.", "cooks", "was cooking", "cooked", "cook", "b", "Tenses", "medium"),
+    ("Identify the adverb: 'He runs very quickly.'", "runs", "very", "quickly", "he", "c", "Parts of Speech", "medium"),
+    ("Identify the preposition: 'The book is on the table.'", "book", "is", "on", "table", "c", "Parts of Speech", "medium"),
+    ("Choose the correct sentence about 'neither': which is correct?", "Neither of them are ready.", "Neither of them is ready.", "Neither of them be ready.", "Neither of them was ready.", "b", "Subject-Verb Agreement", "medium"),
+    ("Choose the correct sentence about 'the team': which is correct?", "The team are winning.", "The team is winning.", "The team be winning.", "The team were winning.", "b", "Subject-Verb Agreement", "medium"),
+    ("Choose the correct word: 'I could ____ done better.'", "of", "have", "off", "half", "b", "Common Errors", "medium"),
+    ("Choose the correct word: '____ going to love this.'", "Your", "You're", "Yore", "Yours", "b", "Common Errors", "medium"),
+
+    # ---- HARD ----
+    ("If she ___ earlier, she wouldn't have missed the bus.", "left", "leaves", "had left", "was leaving", "c", "Tenses", "hard"),
+    ("By the time you arrive, we ___ already left.", "have", "had", "will have", "has", "c", "Tenses", "hard"),
+    ("Identify the conjunction: 'She stayed although it rained.'", "stayed", "although", "rained", "she", "b", "Parts of Speech", "hard"),
+    ("Identify the interjection: 'Wow, that's amazing!'", "wow", "that's", "amazing", "is", "a", "Parts of Speech", "hard"),
+    ("Choose the correct sentence about 'each student': which is correct?", "Each of the students have submitted.", "Each of the students has submitted.", "Each of the students submit.", "Each of the students submitting.", "b", "Subject-Verb Agreement", "hard"),
+    ("Choose the correct sentence about 'the news': which is correct?", "The news are surprising.", "The news is surprising.", "The news were surprising.", "The news be surprising.", "b", "Subject-Verb Agreement", "hard"),
+    ("Choose the correct word: 'The ____ of the policy was huge.'", "effect", "affect", "affects", "effecting", "a", "Common Errors", "hard"),
+    ("Choose the correct word: '____ she left.'", "Then", "Than", "Their", "There", "a", "Common Errors", "hard"),
+]
 
         # executemany() runs like a loop
         # OR IGNORE tells SQLite: if a question with this exact text
