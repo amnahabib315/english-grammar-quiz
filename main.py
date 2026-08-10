@@ -97,6 +97,8 @@ def main():
         print("No questions found matching your choices. Try again.")
         db.close()
         return
+    if len(questions) < count:
+        print(f"\nNote: Only {len(questions)} questions available for your selection (you requested {count}).")
     print(f"\nStarting quiz with {len(questions)} questions...\n")
     quiz = Quiz(questions)
     quiz.run()
