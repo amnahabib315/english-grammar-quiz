@@ -1,27 +1,31 @@
 from database import Database
 from models import Question, Quiz
 
+VALID_CATEGORIES = ["Tenses", "Parts of Speech", "Subject-Verb Agreement", "Common Errors"]
+
 def get_questions(db, difficulty, categories, count):
-    # 'db' is the Database object — it OWNS db.cursor, which OWNS execute().
-    # Only the 'params' tuple below ever fills the '?' placeholders — nothing else.
-
     if len(categories) == 0:
-        # "all" was chosen — no category filter, so only 2 placeholders needed:
-        # one for difficulty, one for the LIMIT count.
-        query = "SELECT * FROM questions WHERE difficulty = ? ORDER BY RANDOM() LIMIT ?"
-        params = (difficulty, count)
-    else:
-        # Build exactly as many '?' as there are categories chosen
-        placeholders = ", ".join(["?"] * len(categories))
-        query = f"SELECT * FROM questions WHERE difficulty = ? AND category IN ({placeholders}) ORDER BY RANDOM() LIMIT ?"
-        #placeholder get fills from this params when db.cursor.execute runs
-#*categories is used to unpcak tuple
-        params = (difficulty, *categories, count)
+        categories = VALID_CATEGORIES   
 
-    db.cursor.execute(query, params)
-    rows = db.cursor.fetchall()
+    base_count = count // len(categories)  # =7//3 = 2
+    remainder = count % len(categories)   #=7%3 = 1
 
-    # Same conversion pattern as always — raw tuples become real Question objects
+    rows = []
+    for i, category in enumerate(categories):
+        this_category_count = base_count + (1 if i < remainder else 0)
+        # = 2 + (1 if 0 < 1 else 0) = 3 for first category
+        # i<rem is bcz after equal distri. we will distribute+1 to each category till the count ends
+         #but here the given if will not work for                
+        if this_category_count > 0:
+            db.cursor.execute(
+                "SELECT * FROM questions WHERE difficulty = ? AND category = ? ORDER BY RANDOM() LIMIT ?",
+                (difficulty, category, this_category_count)
+            )
+            rows.extend(db.cursor.fetchall())
+
+    import random
+    random.shuffle(rows)
+
     questions = []
     for row in rows:
         q = Question(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8])
@@ -29,7 +33,6 @@ def get_questions(db, difficulty, categories, count):
 
     return questions
 
-VALID_CATEGORIES = ["Tenses", "Parts of Speech", "Subject-Verb Agreement", "Common Errors"]
 
 def get_difficulty():
     print("\nDifficulty:")
