@@ -1,5 +1,7 @@
 from database import Database
 from models import Question, Quiz
+from datetime import date
+import random
 
 VALID_CATEGORIES = ["Tenses", "Parts of Speech", "Subject-Verb Agreement", "Common Errors"]
 
@@ -8,22 +10,22 @@ def get_questions(db, difficulty, categories, count):
         categories = VALID_CATEGORIES   
 
     base_count = count // len(categories)  # =7//3 = 2
+    #base_count tells how many questions each category will get
     remainder = count % len(categories)   #=7%3 = 1
-
+    #rem controls how many categ. get that one extra
+    #rem= 3, that means 3 different categories each get +1
     rows = []
     for i, category in enumerate(categories):
         this_category_count = base_count + (1 if i < remainder else 0)
         # = 2 + (1 if 0 < 1 else 0) = 3 for first category
         # i<rem is bcz after equal distri. we will distribute+1 to each category till the count ends
-         #but here the given if will not work for                
+                        
         if this_category_count > 0:
             db.cursor.execute(
                 "SELECT * FROM questions WHERE difficulty = ? AND category = ? ORDER BY RANDOM() LIMIT ?",
                 (difficulty, category, this_category_count)
             )
             rows.extend(db.cursor.fetchall())
-
-    import random
     random.shuffle(rows)
 
     questions = []
@@ -87,38 +89,46 @@ def get_user_choices():
     count = int(input("\nHow many questions? "))
     return difficulty, categories, count
 
+def log_attempts(db, quiz):
+    today = str(date.today())
+    for attempt in quiz.attempt_log:
+        db.cursor.execute("""
+            INSERT INTO attempts (date, category, difficulty, question_id, is_correct)
+            VALUES (?, ?, ?, ?, ?)
+        """, (today, attempt["category"], attempt["difficulty"], attempt["question_id"], attempt["is_correct"]))
+    db.conn.commit()
+    print(f"\n{len(quiz.attempt_log)} attempts logged to database.")
+
+        
 def main():
     db = Database()
 
     print("=== English Grammar Quiz ===")
-    difficulty, categories, count = get_user_choices()
 
-    questions = get_questions(db, difficulty, categories, count)
+    while True:
+        print("\n1. Take Quiz")
+        print("2. Exit")
+        choice = input("Choose an option: ").strip()
 
-    if len(questions) == 0:
-        print("No questions found matching your choices. Try again.")
-        db.close()
-        return
-    if len(questions) < count:
-        print(f"\nNote: Only {len(questions)} questions available for your selection (you requested {count}).")
-    print(f"\nStarting quiz with {len(questions)} questions...\n")
-    quiz = Quiz(questions)
-    quiz.run()
-    from datetime import date
-
-    def log_attempts(db, quiz):
-        today = str(date.today())
-        for attempt in quiz.attempt_log:
-            db.cursor.execute("""
-            INSERT INTO attempts (date, category, difficulty, question_id, is_correct)
-            VALUES (?, ?, ?, ?, ?)
-        """, (today, attempt["category"], attempt["difficulty"], attempt["question_id"], attempt["is_correct"]))
-        db.conn.commit()
-        print(f"\n{len(quiz.attempt_log)} attempts logged to database.")
-    quiz.show_summary()
-    log_attempts(db, quiz)
+        if choice == "1":
+            difficulty, categories, count = get_user_choices()
+            questions = get_questions(db, difficulty, categories, count)
+            if len(questions) == 0:
+                print("No questions found matching your choices. Try again.")
+                continue
+            if len(questions) < count:
+                print(f"\nNote: Only {len(questions)} questions available for your selection (you requested {count}).")
+            print(f"\nStarting quiz with {len(questions)} questions...\n")
+            quiz = Quiz(questions)
+            quiz.run()
+            quiz.show_summary()
+            log_attempts(db, quiz)
+        elif choice == "2":
+            print("Goodbye!")
+            break
+        else:
+            print("Invalid choice. Please try again.")
     db.close()
-
 
 if __name__ == "__main__":
     main()
