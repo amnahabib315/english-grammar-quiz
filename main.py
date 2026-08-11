@@ -2,6 +2,7 @@ from database import Database
 from models import Question, Quiz
 from datetime import date
 import random
+from analytics import show_report
 
 VALID_CATEGORIES = ["Tenses", "Parts of Speech", "Subject-Verb Agreement", "Common Errors"]
 
@@ -107,7 +108,8 @@ def main():
 
     while True:
         print("\n1. Take Quiz")
-        print("2. Exit")
+        print("2. View Performance Report")
+        print("3. Exit")
         choice = input("Choose an option: ").strip()
 
         if choice == "1":
@@ -124,6 +126,8 @@ def main():
             quiz.show_summary()
             log_attempts(db, quiz)
         elif choice == "2":
+            show_report(db)
+        elif choice == "3":
             print("Goodbye!")
             break
         else:
