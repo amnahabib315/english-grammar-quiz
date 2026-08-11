@@ -13,7 +13,7 @@ A console-based English Grammar Quiz application built with Python and SQLite.
 - `Question` class — stores a single question's data, prompts the user for an answer, validates input, and checks correctness
 - `Quiz` class — runs a full quiz session over a list of `Question` objects, tracks the running score, and builds a category-wise accuracy breakdown as it goes
 
-**Quiz Controller (`main.py`)
+**Quiz Controller (`main.py`)**
 
 - User selection of difficulty level (Easy, Medium, Hard)
 - User selection of one or more grammar categories
