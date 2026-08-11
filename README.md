@@ -27,7 +27,7 @@ A console-based English Grammar Quiz application built with Python and SQLite.
 
 ## How to Run
 ```bash
-python database.py   # sets up the database and seeds sample questions
+python database.py   # generates quiz.db, sets up the database and seeds sample questions
 python models.py     # runs a test quiz using sample data
 python main.py       # starts the quiz application
 ```
