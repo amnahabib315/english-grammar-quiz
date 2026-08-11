@@ -20,6 +20,11 @@ A console-based English Grammar Quiz application built with Python and SQLite.
 - Random question retrieval from the database
 - Automatic logging of quiz attempts to the database
 
+**Analytics (`analytics.py`)**
+- Aggregates all-time performance from the `attempts` table using SQL `GROUP BY`
+- Reports accuracy by category and by difficulty level
+- Identifies the weakest category (if any falls below a practice threshold) and flags it for the user
+
 ## Tech Stack
 - Python (OOP)
 - SQLite (`sqlite3`)
@@ -28,6 +33,5 @@ A console-based English Grammar Quiz application built with Python and SQLite.
 ## How to Run
 ```bash
 python database.py   # generates quiz.db, sets up the database and seeds sample questions
-python models.py     # runs a test quiz using sample data
 python main.py       # starts the quiz application
 ```
