@@ -27,7 +27,8 @@ A console-based English Grammar Quiz application built with Python and SQLite.
 
 **Question Data (`questions.csv`)**
 - 36 questions across 4 categories and 3 difficulty levels (3 questions each)
-- Used to seed the database
+- Loaded into the database via `load_questions_from_csv()`, using `INSERT OR IGNORE` so re-running never creates duplicates
+- New questions can be added anytime by appending rows to `questions.csv` and re-running `database.py`
 
 ## Tech Stack
 - Python (OOP)
