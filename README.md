@@ -25,6 +25,10 @@ A console-based English Grammar Quiz application built with Python and SQLite.
 - Reports accuracy by category and by difficulty level
 - Identifies the weakest category (if any falls below a practice threshold) and flags it for the user
 
+**Question Data (`questions.csv`)**
+- 36 questions across 4 categories and 3 difficulty levels (3 questions each)
+- Used to seed the database
+
 ## Tech Stack
 - Python (OOP)
 - SQLite (`sqlite3`)
