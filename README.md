@@ -39,3 +39,4 @@ A console-based English Grammar Quiz application built with Python and SQLite.
 python database.py   # generates quiz.db, sets up the database and seeds sample questions
 python main.py       # starts the quiz application
 ```
+**Note:** `quiz.db` may contain a couple of legacy question entries beyond what's in `questions.csv`, kept intentionally because they're referenced by existing logged attempts (removing them would break the foreign key relationship in the `attempts` table).
