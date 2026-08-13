@@ -30,6 +30,10 @@ A console-based English Grammar Quiz application built with Python and SQLite.
 - Loaded into the database via `load_questions_from_csv()`, using `INSERT OR IGNORE` so re-running never creates duplicates
 - New questions can be added anytime by appending rows to `questions.csv` and re-running `database.py`
 
+**Charts (`charts.py`)**
+- Visualizes accuracy by category and by difficulty using matplotlib bar charts
+- Accessed via the "View Performance Charts" submenu in the app
+
 ## Tech Stack
 - Python (OOP)
 - SQLite (`sqlite3`)
