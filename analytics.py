@@ -34,7 +34,7 @@ def accuracy_by_difficulty(db):
         accuracy_percentage = (correct_count / total_count) * 100 if total_count > 0 else 0
         accuracy_data.append((difficulty, total_count, correct_count, accuracy_percentage))
 
-    return accuracy_data
+    return accuracy_data #list with tuples
 
 def overall_stats(db):
     db.cursor.execute("""
