@@ -41,7 +41,8 @@ A console-based English Grammar Quiz application built with Python and SQLite.
 
 ## How to Run
 ```bash
-python database.py   # generates quiz.db, sets up the database and seeds sample questions
+pip install matplotlib   # required for performance charts
+python database.py   # generates quiz.db, seeds questions from questions.csv
 python main.py       # starts the quiz application
 ```
 **Note:** `quiz.db` may contain a couple of legacy question entries beyond what's in `questions.csv`, kept intentionally because they're referenced by existing logged attempts (removing them would break the foreign key relationship in the `attempts` table).
