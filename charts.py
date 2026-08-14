@@ -1,8 +1,12 @@
 from analytics import accuracy_by_category, accuracy_by_difficulty
 import matplotlib.pyplot as plt
 
+
+CATEGORY_ORDER = {"Tenses": 0, "Parts of Speech": 1, "Subject-Verb Agreement": 2, "Common Errors": 3}
+#we have to define order bcz chart sets them in alphabetical order
 def plot_category_accuracy(db):
     data = accuracy_by_category(db)
+    data = sorted(data, key=lambda row: CATEGORY_ORDER[row[0]]) 
     labels = [row[0] for row in data] 
     #its a list with tuples each tuple has 4 elements we want first element of each tuple which is category name
     values = [row[3] for row in data]
@@ -19,8 +23,10 @@ def plot_category_accuracy(db):
     plt.xticks(rotation=30, ha='right')
     #it tilts bar lables to 30deg in right direction
     
+    plt.grid(axis='y', alpha=0.3)
+    #The whole figure(entire window) is measured on a scale from 0 to 1 called figure coordinates
     plt.yticks(fontsize=10)
-    plt.tight_layout() 
+    plt.tight_layout(rect=[0, 0.05, 1, 1]) #controls how much space is reserved around the chart 
     #it sets the layout of the plot to fit within the figure area and avoid overlapping elements
     
     for i, v in enumerate(values):
@@ -45,7 +51,10 @@ def plot_category_accuracy(db):
     worst_idx = values.index(min(values))
     worst_label = labels[worst_idx]
     worst_value = values[worst_idx]
-    plt.title(f"Accuracy by Category\nBest: {best_label} ({best_value:.1f}%)  |  Weakest: {worst_label} ({worst_value:.1f}%)", fontsize=13, fontweight='bold')
+    plt.figtext(0.5, 0.02, f"Best: {best_label} ({best_value:.1f}%)  |  Weakest: {worst_label} ({worst_value:.1f}%)", ha='center', fontsize=10, style='italic')
+    #places text at a specific position overall figure 0.5 means horiz center 0.02 means very close to the bottom edge
+    plt.title(f"Accuracy by Category", fontsize=13, fontweight='bold')
+    #title at the top of chart
     plt.show()
     while True:
         save_choice = input("Save this chart as an image? (y/n): ").strip().lower()
@@ -61,9 +70,10 @@ def plot_category_accuracy(db):
     
     
     
-    
+DIFFICULTY_ORDER = {"easy": 0, "medium": 1, "hard": 2}    
 def plot_difficulty_accuracy(db):
     data = accuracy_by_difficulty(db)
+    data = sorted(data, key=lambda row: DIFFICULTY_ORDER[row[0]])
     labels = [row[0] for row in data]
     values = [row[3] for row in data]
     colors = ['#4CAF50' if v >= 60 else '#E53935' for v in values]
@@ -74,6 +84,7 @@ def plot_difficulty_accuracy(db):
     plt.ylabel("Accuracy (%)", labelpad=10, fontsize=12, fontweight='bold')
     plt.xlabel("Difficulty", labelpad=10, fontsize=12, fontweight='bold')
     plt.ylim(0, 100)
+    plt.grid(axis='y', alpha=0.3)
     
     for i, v in enumerate(values):
         plt.text(i, v + 2, f"{v:.1f}%", ha='center')
@@ -86,6 +97,7 @@ def plot_difficulty_accuracy(db):
     plt.xticks(fontsize=10)    
     #this sets bar lable size
     plt.yticks(fontsize=10)
+    plt.tight_layout(rect=[0, 0.05, 1, 1])
      
     avg = sum(values) / len(values)
     plt.axhline(y=avg, color='blue', linestyle=':', linewidth=1, label=f'Overall Average: {avg:.1f}%')
@@ -97,7 +109,8 @@ def plot_difficulty_accuracy(db):
     worst_idx = values.index(min(values))
     worst_label = labels[worst_idx]
     worst_value = values[worst_idx]
-    plt.title(f"Accuracy by Difficulty\nBest: {best_label} ({best_value:.1f}%)  |  Weakest: {worst_label} ({worst_value:.1f}%)", fontsize=13, fontweight='bold')
+    plt.figtext(0.5, 0.02, f"Best: {best_label} ({best_value:.1f}%)  |  Weakest: {worst_label} ({worst_value:.1f}%)", ha='center', fontsize=10, style='italic')
+    plt.title("Accuracy by Difficulty", fontsize=14, fontweight='bold')
     
     plt.show()
     while True:
