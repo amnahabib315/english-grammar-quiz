@@ -112,3 +112,22 @@ def show_report(db):
         print(f"  Accuracy: {accuracy_percentage:.2f}% - Focus on this category for improvement.")
     else:
         print("\nGreat job! No category is significantly weaker.")
+    print("\nAccuracy of your performance over last few attempts (by date):\n")
+    db.cursor.execute("""
+        SELECT date, 
+               SUM(CASE WHEN is_correct = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS accuracy
+        FROM attempts
+        GROUP BY date
+        ORDER BY date DESC
+        LIMIT 3
+    """)
+    date_accuracy = db.cursor.fetchall()
+    for date, accuracy in reversed(date_accuracy):
+        print(f"  {date}: {accuracy:.2f}%")
+
+def accuracy_by_date(db):
+    db.cursor.execute("""SELECT date, SUM(is_correct) * 100.0 / COUNT(*) AS accuracy
+FROM attempts
+GROUP BY date
+ORDER BY date DESC
+LIMIT 10""")
