@@ -1,6 +1,7 @@
 from analytics import accuracy_by_category, accuracy_by_difficulty
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
+import textwrap
 #Patch is a shape object specifically rectangle/square 
 # exists purely as a visual in matplotli used here for creating a small colored swatch to show in  legend
 
@@ -8,6 +9,9 @@ CATEGORY_ORDER = {"Tenses": 0, "Parts of Speech": 1, "Subject-Verb Agreement": 2
 #we have to define order bcz chart sets them in alphabetical order
 def plot_category_accuracy(db):
     data = accuracy_by_category(db)
+    if not data:
+        print("\nNo data yet — take a quiz first!")
+        return
     data = sorted(data, key=lambda row: CATEGORY_ORDER[row[0]]) 
     labels = [row[0] for row in data] 
     #its a list with tuples each tuple has 4 elements we want first element of each tuple which is category name
@@ -20,36 +24,41 @@ def plot_category_accuracy(db):
             colors.append('#FFA726')   # orange
         else:
             colors.append('#E53935')   # red    
-    plt.figure(figsize=(9, 6.5))
-    plt.bar(labels, values, color=colors)
-    plt.title("Accuracy by Category", fontsize=14, fontweight='bold', pad=20)
-    plt.ylabel("Accuracy (%)", labelpad=10, fontsize=12, fontweight='bold')
-    plt.xlabel("Category" , labelpad=10, fontsize=12, fontweight='bold')
-    plt.ylim(0, 100)
+
+    # fig = the whole window, ax = just the chart area — controlling them
+    # separately is what lets the legend live in its OWN reserved space,
+    # completely outside the chart, so it can never overlap tall bars
+    fig, ax = plt.subplots(figsize=(9, 6.5))
+
+    ax.bar(labels, values, color=colors)
+    ax.set_title("Accuracy by Category", fontsize=16, fontweight='bold', pad=15)
+    ax.set_ylabel("Accuracy (%)", labelpad=10, fontsize=12, fontweight='bold')
+    ax.set_xlabel("Category", labelpad=10, fontsize=12, fontweight='bold')
+    ax.set_ylim(0, 100)
     #it sets y-axis limits from 0 to 100 otherwise it automatically adjust y-axis limits based on data
-    
-    plt.xticks(rotation=30, ha='right')
+
+    wrapped_labels = [textwrap.fill(l, 12) for l in labels]
+    ax.set_xticks(range(len(labels)))
+    ax.set_xticklabels(wrapped_labels, rotation=0, fontsize=10)
     #it tilts bar lables to 30deg in right direction
-    
-    plt.grid(axis='y', alpha=0.3)
+
+    ax.grid(axis='y', alpha=0.3)
     #The whole figure(entire window) is measured on a scale from 0 to 1 called figure coordinates
-    plt.yticks(fontsize=10)
-    plt.tight_layout(rect=[0, 0.05, 1, 0.78]) #controls how much space is reserved around the chart 
-    #it sets the layout of the plot to fit within the figure area and avoid overlapping elements
-    
+    ax.tick_params(axis='y', labelsize=10)
+
     for i, v in enumerate(values):
-        plt.text(i, v + 2, f"{v:.1f}%", ha='center')
+        ax.text(i, v + 2, f"{v:.1f}%", ha='center')
 #it adds text labels above each bar displaying the accuracy where v+2 is the space diff bw bar and lable
 
-    plt.gca().set_facecolor('#f5f5f5')
+    ax.set_facecolor('#f5f5f5')
     #get current axes means this grabs the chart area itself so we can set its background color to light gray
-    
-    plt.gca().spines['top'].set_visible(False)
-    plt.gca().spines['right'].set_visible(False)
+
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
     #removes top and right border lines
-    
+
     avg = sum(values) / len(values)
-    plt.axhline(y=avg, color='blue', linestyle=':', linewidth=1)   # note: no label= here anymore, legend is now built manually below
+    ax.axhline(y=avg, color='blue', linestyle=':', linewidth=1)   # note: no label= here anymore, legend is now built manually below
 
     legend_elements = [
     Patch(facecolor='#4CAF50', label='Good (≥60%)'),
@@ -58,23 +67,30 @@ def plot_category_accuracy(db):
     Patch(facecolor='#E53935', label='Weak (<40%)'),
     plt.Line2D([0], [0], color='blue', linestyle=':', label=f'Overall Average: {avg:.1f}%')
 ]
-    plt.legend(handles=legend_elements, loc='lower left', bbox_to_anchor=(0, 1.12), ncol=1, fontsize=9, frameon=False)
-    #bbox_to_anchor=(1.02, 1) means the legend box is placed outside the chart area to the right, with its top aligned with the top of the chart
+    # fig.legend (not ax.legend/plt.legend) attaches the legend to the WHOLE
+    # figure, in figure-coordinates (0 to 1 top-to-bottom), independent of
+    # the chart's own coordinate space — this is what guarantees it can
+    # never collide with bars, no matter how tall they get
+    fig.legend(handles=legend_elements, loc='upper center', ncol=4, fontsize=8, frameon=False, bbox_to_anchor=(0.5, 0.98))
     #displays a small key on the chart explaining what the line represents
     #its an overall average
-     
+
     best_idx = values.index(max(values))
     best_label = labels[best_idx]
     best_value = values[best_idx]
     worst_idx = values.index(min(values))
     worst_label = labels[worst_idx]
     worst_value = values[worst_idx]
-    plt.figtext(0.5, 0.02, f"Best: {best_label} ({best_value:.1f}%)  |  Weakest: {worst_label} ({worst_value:.1f}%)",
+    fig.text(0.5, 0.01, f"Best: {best_label} ({best_value:.1f}%)  |  Weakest: {worst_label} ({worst_value:.1f}%)",
     ha='center', fontsize=11, fontweight='bold', style='italic')
     #ha=horizontal allignment
-    #places text at a specific position overall figure 0.5 means horiz center 0.02 means very close to the bottom edge
-    plt.title(f"Accuracy by Category", fontsize=13, fontweight='bold')
-    #title at the top of chart
+    #places text at a specific position overall figure 0.5 means horiz center 0.01 means very close to the bottom edge
+
+    # explicit, guaranteed control over vertical space: chart area only
+    # occupies from 18% to 80% of the figure height — legend gets the top
+    # 20%, caption gets the bottom 18%, no automatic guessing involved
+    fig.subplots_adjust(top=0.80, bottom=0.18)
+
     plt.show()
     while True:
         save_choice = input("Save this chart as an image? (y/n): ").strip().lower()
@@ -87,12 +103,15 @@ def plot_category_accuracy(db):
             break
         else:
             print("Invalid input. Please enter y or n.")
-    
-    
-    
+
+
+
 DIFFICULTY_ORDER = {"easy": 0, "medium": 1, "hard": 2}    
 def plot_difficulty_accuracy(db):
     data = accuracy_by_difficulty(db)
+    if not data:
+        print("\nNo data yet — take a quiz first!")
+        return
     data = sorted(data, key=lambda row: DIFFICULTY_ORDER[row[0]])#sorted runs once per tuple
     #lambda compares data with difficulty order and sorts it in difficulty order way
     #data gaves  order the way its stred in attempt table
@@ -107,30 +126,33 @@ def plot_difficulty_accuracy(db):
             colors.append('#FFA726')   # orange
         else:
             colors.append('#E53935')   # red
-    
-    plt.figure(figsize=(9, 6.5))
-    plt.bar(labels, values, color=colors)
-    plt.title("Accuracy by Difficulty", fontsize=14, fontweight='bold', pad=20)
-    plt.ylabel("Accuracy (%)", labelpad=10, fontsize=12, fontweight='bold')
-    plt.xlabel("Difficulty", labelpad=10, fontsize=12, fontweight='bold')
-    plt.ylim(0, 100)
-    plt.grid(axis='y', alpha=0.3)
-    
+
+    fig, ax = plt.subplots(figsize=(9, 6.5))
+
+    ax.bar(labels, values, color=colors)
+    ax.set_title("Accuracy by Difficulty", fontsize=16, fontweight='bold', pad=15)
+    ax.set_ylabel("Accuracy (%)", labelpad=10, fontsize=12, fontweight='bold')
+    ax.set_xlabel("Difficulty", labelpad=10, fontsize=12, fontweight='bold')
+    ax.set_ylim(0, 100)
+    ax.grid(axis='y', alpha=0.3)
+
     for i, v in enumerate(values):
-        plt.text(i, v + 2, f"{v:.1f}%", ha='center')
-        
-    plt.gca().set_facecolor('#f5f5f5')
+        ax.text(i, v + 2, f"{v:.1f}%", ha='center')
+
+    ax.set_facecolor('#f5f5f5')
+
+    ax.spines['top'].set_visible(False) #border lines across chart
+    ax.spines['right'].set_visible(False)
+
     
-    plt.gca().spines['top'].set_visible(False)
-    plt.gca().spines['right'].set_visible(False)
-    
-    plt.xticks(fontsize=10)    
+    wrapped_labels = [textwrap.fill(l, 12) for l in labels]
+    ax.set_xticks(range(len(labels)))
+    ax.set_xticklabels(wrapped_labels, rotation=0, fontsize=10)
     #this sets bar lable size
-    plt.yticks(fontsize=10)
-    plt.tight_layout(rect=[0, 0.05, 1, 0.78])
-     
+    ax.tick_params(axis='y', labelsize=10)
+
     avg = sum(values) / len(values)
-    plt.axhline(y=avg, color='blue', linestyle=':', linewidth=1) 
+    ax.axhline(y=avg, color='blue', linestyle=':', linewidth=1)
     #axhline stands for axis horizontal line draws a horizontal line across the chart at the specified y-value (avg)
 
     legend_elements = [ #this is for representing in the legend box
@@ -140,18 +162,19 @@ def plot_difficulty_accuracy(db):
     plt.Line2D([0], [0], color='blue', linestyle=':', label=f'Overall Average: {avg:.1f}%')
     #2D line is used to create a custom legend entry for the average line
 ]
-    plt.legend(handles=legend_elements, loc='lower left', bbox_to_anchor=(0, 1.12), ncol=1, fontsize=9, frameon=False)
-    
+    fig.legend(handles=legend_elements, loc='upper center', ncol=4, fontsize=8, frameon=False, bbox_to_anchor=(0.5, 0.98))
+
     best_idx = values.index(max(values))
     best_label = labels[best_idx]
     best_value = values[best_idx]
     worst_idx = values.index(min(values))
     worst_label = labels[worst_idx]
     worst_value = values[worst_idx]
-    plt.figtext(0.5, 0.02, f"Best: {best_label} ({best_value:.1f}%)  |  Weakest: {worst_label} ({worst_value:.1f}%)",
+    fig.text(0.5, 0.01, f"Best: {best_label} ({best_value:.1f}%)  |  Weakest: {worst_label} ({worst_value:.1f}%)",
     ha='center', fontsize=11, fontweight='bold', style='italic')
-    plt.title("Accuracy by Difficulty", fontsize=14, fontweight='bold')
-    
+
+    fig.subplots_adjust(top=0.80, bottom=0.18)
+
     plt.show()
     while True:
         save_choice = input("Save this chart as an image? (y/n): ").strip().lower()
