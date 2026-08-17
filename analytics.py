@@ -131,3 +131,5 @@ FROM attempts
 GROUP BY date
 ORDER BY date DESC
 LIMIT 10""")
+    result= db.cursor.fetchall()
+    return result

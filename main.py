@@ -3,7 +3,7 @@ from models import Question, Quiz
 from datetime import date
 import random
 from analytics import show_report
-from charts import plot_category_accuracy, plot_difficulty_accuracy
+from charts import plot_category_accuracy, plot_difficulty_accuracy, plot_accuracy_over_time
 
 VALID_CATEGORIES = ["Tenses", "Parts of Speech", "Subject-Verb Agreement", "Common Errors"]
 
@@ -133,13 +133,16 @@ def main():
             while True:
                 print("\n1. Accuracy by Category")
                 print("2. Accuracy by Difficulty")
-                print("3. Back to Main Menu")
+                print("3. Accuracy Over Time")
+                print("4. Back to Main Menu")
                 chart_choice = input("Choose an option: ").strip()
                 if chart_choice == "1":
                     plot_category_accuracy(db)
                 elif chart_choice == "2":
                     plot_difficulty_accuracy(db)
                 elif chart_choice == "3":
+                    plot_accuracy_over_time(db)
+                elif chart_choice == "4":
                     break
                 else:
                     print("Invalid choice. Please try again.")

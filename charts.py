@@ -1,4 +1,4 @@
-from analytics import accuracy_by_category, accuracy_by_difficulty
+from analytics import accuracy_by_category, accuracy_by_difficulty,accuracy_by_date
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 import textwrap
@@ -187,3 +187,42 @@ def plot_difficulty_accuracy(db):
             break
         else:
             print("Invalid input. Please enter y or n.")
+            
+            
+def plot_accuracy_over_time(db):
+    data=accuracy_by_date(db)
+    if not data:
+        print("\nNo data yet — take a quiz first!")
+        return
+    dates=[row[0] for row in data]
+    accuracies=[row[1] for row in data] 
+    fig, ax = plt.subplots(figsize=(9, 6.5))
+    ax.plot(dates, accuracies, marker='o', color='#4CAF50')
+    ax.set_title("Accuracy Over Time", fontsize=16, fontweight='bold', pad=15)
+    ax.set_xlabel("Date", fontsize=12, fontweight='bold', labelpad=10)
+    ax.set_ylabel("Accuracy (%)", fontsize=12, fontweight='bold', labelpad=10)
+    ax.set_ylim(0, 100)
+    ax.grid(axis='y', alpha=0.3)
+    for i, v in enumerate(accuracies):  
+        ax.text(dates[i], v + 2, f"{v:.1f}%", ha='center')
+    ax.tick_params(axis='x', rotation=0, labelsize=10)
+    ax.tick_params(axis='y', labelsize=10)
+    avg=sum(accuracies)/len(accuracies)
+    ax.axhline(y=avg, color='blue', linestyle=':', linewidth=1)
+    ax.legend([f'Overall Average: {avg:.1f}%'], loc='upper center', fontsize=8, frameon=False) 
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False) 
+    ax.set_facecolor('#f5f5f5')
+    fig.subplots_adjust(top=0.80, bottom=0.18)
+    plt.show()
+    while True:
+        save_choice = input("Save this chart as an image? (y/n): ").strip().lower()
+        if save_choice == 'y':
+            plt.savefig("accuracy_over_time.png", dpi=150, bbox_inches='tight')
+            print("Chart saved as accuracy_over_time.png")
+            break
+        elif save_choice == 'n':
+            print("Chart not saved.")
+            break
+        else:
+            print("Invalid input. Please enter y or n.")  
