@@ -134,7 +134,8 @@ def main():
                 print("2. Accuracy by Difficulty")
                 print("3. Accuracy Over Time")
                 print("4. Correct vs Incorrect Answers")
-                print("5. Back to Main Menu")
+                print("5. Overall performance dashboard")
+                print("6. Back to Main Menu")
                 chart_choice = input("Choose an option: ").strip()
                 if chart_choice == "1":
                     C.plot_category_accuracy(db)
@@ -145,6 +146,8 @@ def main():
                 elif chart_choice == "4":
                     C.plot_correct_vs_incorrect(db)
                 elif chart_choice == "5":
+                    C.show_dashboard(db)
+                elif chart_choice == "6":
                     break
                 else:
                     print("Invalid choice. Please try again.")

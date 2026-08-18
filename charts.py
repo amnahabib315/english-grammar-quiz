@@ -5,9 +5,23 @@ import textwrap
 #Patch is a shape object specifically rectangle/square 
 # exists purely as a visual in matplotli used here for creating a small colored swatch to show in  legend
 
+
 CATEGORY_ORDER = {"Tenses": 0, "Parts of Speech": 1, "Subject-Verb Agreement": 2, "Common Errors": 3}
 #we have to define order bcz chart sets them in alphabetical order
-def plot_category_accuracy(db):
+DIFFICULTY_ORDER = {"easy": 0, "medium": 1, "hard": 2}
+
+
+def get_color(v):
+    # shared color rule so all charts + dashboard use the exact same thresholds, defined once
+    if v >= 60:
+        return '#4CAF50'   # green
+    elif v >= 40:
+        return '#FFA726'   # orange
+    else:
+        return '#E53935'   # red
+
+
+def plot_category_accuracy(db, ax=None):
     data = analytics.accuracy_by_category(db)
     if not data:
         print("\nNo data yet — take a quiz first!")
@@ -16,38 +30,34 @@ def plot_category_accuracy(db):
     labels = [row[0] for row in data] 
     #its a list with tuples each tuple has 4 elements we want first element of each tuple which is category name
     values = [row[3] for row in data]
-    colors = []
-    for v in values:
-        if v >= 60:
-            colors.append('#4CAF50')   # green
-        elif v >= 40:
-            colors.append('#FFA726')   # orange
-        else:
-            colors.append('#E53935')   # red    
+    colors = [get_color(v) for v in values]   # now uses shared get_color instead of repeated if/elif
 
-    # fig = the whole window, ax = just the chart area — controlling them
-    # separately is what lets the legend live in its OWN reserved space,
-    # completely outside the chart, so it can never overlap tall bars
-    fig, ax = plt.subplots(figsize=(9, 6.5))
+    # standalone = True means this was called on its own (normal chart view);
+    # False means it was handed an ax by show_dashboard(), so it should just
+    # draw into that ax and skip the window-only extras (legend/caption/save)
+    standalone = ax is None
+    if standalone:
+        # fig = the whole window, ax = just the chart area — controlling them
+        # separately is what lets the legend live in its OWN reserved space,
+        # completely outside the chart, so it can never overlap tall bars
+        fig, ax = plt.subplots(figsize=(9, 6.5))
 
     ax.bar(labels, values, color=colors)
-    ax.set_title("Accuracy by Category", fontsize=16, fontweight='bold', pad=15)
-    ax.set_ylabel("Accuracy (%)", labelpad=10, fontsize=12, fontweight='bold')
-    ax.set_xlabel("Category", labelpad=10, fontsize=12, fontweight='bold')
+    ax.set_title("Accuracy by Category", fontsize=16 if standalone else 12, fontweight='bold', pad=15 if standalone else 8)
     ax.set_ylim(0, 100)
     #it sets y-axis limits from 0 to 100 otherwise it automatically adjust y-axis limits based on data
 
     wrapped_labels = [textwrap.fill(l, 12) for l in labels]
     ax.set_xticks(range(len(labels)))
-    ax.set_xticklabels(wrapped_labels, rotation=0, fontsize=10)
+    ax.set_xticklabels(wrapped_labels, rotation=0, fontsize=10 if standalone else 8)
     #it tilts bar lables to 30deg in right direction
 
     ax.grid(axis='y', alpha=0.3)
     #The whole figure(entire window) is measured on a scale from 0 to 1 called figure coordinates
-    ax.tick_params(axis='y', labelsize=10)
+    ax.tick_params(axis='y', labelsize=10 if standalone else 8)
 
     for i, v in enumerate(values):
-        ax.text(i, v + 2, f"{v:.1f}%", ha='center')
+        ax.text(i, v + 2, f"{v:.1f}%", ha='center', fontsize=10 if standalone else 8)
 #it adds text labels above each bar displaying the accuracy where v+2 is the space diff bw bar and lable
 
     ax.set_facecolor('#f5f5f5')
@@ -59,6 +69,14 @@ def plot_category_accuracy(db):
 
     avg = sum(values) / len(values)
     ax.axhline(y=avg, color='blue', linestyle=':', linewidth=1)   # note: no label= here anymore, legend is now built manually below
+
+    # everything below this line is ONLY for standalone viewing —
+    # dashboard mini-charts skip legend/labels/caption/save to stay clean
+    if not standalone:
+        return
+
+    ax.set_ylabel("Accuracy (%)", labelpad=10, fontsize=12, fontweight='bold')
+    ax.set_xlabel("Category", labelpad=10, fontsize=12, fontweight='bold')
 
     legend_elements = [
     Patch(facecolor='#4CAF50', label='Good (≥60%)'),
@@ -105,9 +123,7 @@ def plot_category_accuracy(db):
             print("Invalid input. Please enter y or n.")
 
 
-
-DIFFICULTY_ORDER = {"easy": 0, "medium": 1, "hard": 2}    
-def plot_difficulty_accuracy(db):
+def plot_difficulty_accuracy(db, ax=None):
     data = analytics.accuracy_by_difficulty(db)
     if not data:
         print("\nNo data yet — take a quiz first!")
@@ -118,42 +134,40 @@ def plot_difficulty_accuracy(db):
     #for each row, look up its difficulty name's position number and reorder rows by that number
     labels = [row[0] for row in data]
     values = [row[3] for row in data]
-    colors = [] #this list is for colors in the bar
-    for v in values:
-        if v >= 60:
-            colors.append('#4CAF50')   # green
-        elif v >= 40:
-            colors.append('#FFA726')   # orange
-        else:
-            colors.append('#E53935')   # red
+    colors = [get_color(v) for v in values]   # shared color rule
 
-    fig, ax = plt.subplots(figsize=(9, 6.5))
+    standalone = ax is None
+    if standalone:
+        fig, ax = plt.subplots(figsize=(9, 6.5))
 
     ax.bar(labels, values, color=colors)
-    ax.set_title("Accuracy by Difficulty", fontsize=16, fontweight='bold', pad=15)
-    ax.set_ylabel("Accuracy (%)", labelpad=10, fontsize=12, fontweight='bold')
-    ax.set_xlabel("Difficulty", labelpad=10, fontsize=12, fontweight='bold')
+    ax.set_title("Accuracy by Difficulty", fontsize=16 if standalone else 12, fontweight='bold', pad=15 if standalone else 8)
     ax.set_ylim(0, 100)
     ax.grid(axis='y', alpha=0.3)
 
     for i, v in enumerate(values):
-        ax.text(i, v + 2, f"{v:.1f}%", ha='center')
+        ax.text(i, v + 2, f"{v:.1f}%", ha='center', fontsize=10 if standalone else 8)
 
     ax.set_facecolor('#f5f5f5')
 
     ax.spines['top'].set_visible(False) #border lines across chart
     ax.spines['right'].set_visible(False)
 
-    
     wrapped_labels = [textwrap.fill(l, 12) for l in labels]
     ax.set_xticks(range(len(labels)))
-    ax.set_xticklabels(wrapped_labels, rotation=0, fontsize=10)
+    ax.set_xticklabels(wrapped_labels, rotation=0, fontsize=10 if standalone else 8)
     #this sets bar lable size
-    ax.tick_params(axis='y', labelsize=10)
+    ax.tick_params(axis='y', labelsize=10 if standalone else 8)
 
     avg = sum(values) / len(values)
     ax.axhline(y=avg, color='blue', linestyle=':', linewidth=1)
     #axhline stands for axis horizontal line draws a horizontal line across the chart at the specified y-value (avg)
+
+    if not standalone:
+        return
+
+    ax.set_ylabel("Accuracy (%)", labelpad=10, fontsize=12, fontweight='bold')
+    ax.set_xlabel("Difficulty", labelpad=10, fontsize=12, fontweight='bold')
 
     legend_elements = [ #this is for representing in the legend box
     Patch(facecolor='#4CAF50', label='Good (≥60%)'),
@@ -187,34 +201,44 @@ def plot_difficulty_accuracy(db):
             break
         else:
             print("Invalid input. Please enter y or n.")
-            
-            
-def plot_accuracy_over_time(db):
-    data=analytics.accuracy_by_date(db)
+
+
+def plot_accuracy_over_time(db, ax=None):
+    standalone = ax is None
+    data = analytics.accuracy_by_date(db, limit=8 if standalone else 4)
     data = list(reversed(data))
     if not data:
         print("\nNo data yet — take a quiz first!")
         return
-    dates=[row[0] for row in data]
-    accuracies=[row[1] for row in data] 
-    fig, ax = plt.subplots(figsize=(9, 6.5))
+    dates = [row[0] for row in data]
+    accuracies = [row[1] for row in data]
+
+    if standalone:
+        fig, ax = plt.subplots(figsize=(9, 6.5))
+
     ax.plot(dates, accuracies, marker='o', color='#4CAF50')
-    ax.set_title("Accuracy Over Time", fontsize=16, fontweight='bold', pad=15)
-    ax.set_xlabel("Date", fontsize=12, fontweight='bold', labelpad=10)
-    ax.set_ylabel("Accuracy (%)", fontsize=12, fontweight='bold', labelpad=10)
+    ax.set_title("Accuracy Over Time", fontsize=16 if standalone else 12, fontweight='bold', pad=15 if standalone else 8)
     ax.set_ylim(0, 100)
     ax.grid(axis='y', alpha=0.3)
     for i, v in enumerate(accuracies):  
-        ax.text(dates[i], v + 2, f"{v:.1f}%", ha='center')
-    ax.tick_params(axis='x', rotation=0, labelsize=10)
-    ax.tick_params(axis='y', labelsize=10)
-    avg=sum(accuracies)/len(accuracies)
+        ax.text(dates[i], v + 2, f"{v:.1f}%", ha='center', fontsize=10 if standalone else 8)
+
+    ax.tick_params(axis='x', rotation=0, labelsize=10 if standalone else 8)
+    ax.tick_params(axis='y', labelsize=10 if standalone else 8)
+    avg = sum(accuracies) / len(accuracies)
     avg_line = ax.axhline(y=avg, color='blue', linestyle=':', linewidth=1)
-    fig.legend(handles=[avg_line], labels=[f'Overall Average: {avg:.1f}%'], loc='upper center', ncol=1, 
-    fontsize=8, frameon=False, bbox_to_anchor=(0.5, 0.98))
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False) 
     ax.set_facecolor('#f5f5f5')
+
+    if not standalone:
+        return
+
+    ax.set_xlabel("Date", fontsize=12, fontweight='bold', labelpad=10)
+    ax.set_ylabel("Accuracy (%)", fontsize=12, fontweight='bold', labelpad=10)
+
+    fig.legend(handles=[avg_line], labels=[f'Overall Average: {avg:.1f}%'], loc='upper center', ncol=1, 
+    fontsize=8, frameon=False, bbox_to_anchor=(0.5, 0.98))
     fig.subplots_adjust(top=0.80, bottom=0.18)
     plt.show()
     while True:
@@ -227,10 +251,10 @@ def plot_accuracy_over_time(db):
             print("Chart not saved.")
             break
         else:
-            print("Invalid input. Please enter y or n.") 
+            print("Invalid input. Please enter y or n.")
 
 
-def plot_correct_vs_incorrect(db):
+def plot_correct_vs_incorrect(db, ax=None):
     total, correct, accuracy = analytics.overall_stats(db)
     if total == 0:
         print("\nNo data yet — take a quiz first!")
@@ -241,9 +265,17 @@ def plot_correct_vs_incorrect(db):
     values = [correct, incorrect]
     colors = ['#4CAF50', '#E53935']
 
-    fig, ax = plt.subplots(figsize=(8, 8))
-    ax.pie(values, labels=labels, colors=colors, autopct='%1.1f%%', startangle=90, textprops={'fontsize': 12})
-    ax.set_title("Correct vs Incorrect Answers", fontsize=16, fontweight='bold', pad=20)
+    standalone = ax is None
+    if standalone:
+        fig, ax = plt.subplots(figsize=(8, 8))
+
+    ax.pie(values, labels=labels, colors=colors, autopct='%1.1f%%', startangle=90,
+           textprops={'fontsize': 12 if standalone else 9})
+    ax.set_title("Correct vs Incorrect Answers", fontsize=16 if standalone else 12, fontweight='bold',
+                 pad=20 if standalone else 8)
+
+    if not standalone:
+        return
 
     plt.show()
     while True:
@@ -257,3 +289,33 @@ def plot_correct_vs_incorrect(db):
             break
         else:
             print("Invalid input. Please enter y or n.")
+
+
+def show_dashboard(db):
+    # reuses the same 4 chart functions above, just handing each one an ax
+    # to draw into instead of letting them open their own window
+    if not analytics.accuracy_by_category(db):
+        print("\nNo data yet — take a quiz first!")
+        return
+
+    fig, axes = plt.subplots(2, 2, figsize=(15, 11))
+
+    plot_category_accuracy(db, ax=axes[0, 0])
+    plot_difficulty_accuracy(db, ax=axes[0, 1])
+    plot_accuracy_over_time(db, ax=axes[1, 0])
+    plot_correct_vs_incorrect(db, ax=axes[1, 1])
+
+    fig.suptitle("Performance Dashboard", fontsize=18, fontweight='bold')
+    fig.subplots_adjust(hspace=0.5, wspace=0.3, top=0.90)
+    plt.show()
+    while True:
+            save_choice = input("Save this chart as an image? (y/n): ").strip().lower()
+            if save_choice == 'y':
+                plt.savefig("overall_dashboard.png", dpi=150, bbox_inches='tight')
+                print("Chart saved as overall_dashboard.png")
+                break
+            elif save_choice == 'n':
+                print("Chart not saved.")
+                break
+            else:
+                print("Invalid input. Please enter y or n.")

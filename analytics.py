@@ -125,11 +125,11 @@ def show_report(db):
     for date, accuracy in reversed(date_accuracy):
         print(f"  {date}: {accuracy:.2f}%")
 
-def accuracy_by_date(db):
+def accuracy_by_date(db, limit=8):
     db.cursor.execute("""SELECT date, SUM(is_correct) * 100.0 / COUNT(*) AS accuracy
 FROM attempts
 GROUP BY date
 ORDER BY date DESC
-LIMIT 10""")
-    result= db.cursor.fetchall()
+LIMIT ?""", (limit,))
+    result = db.cursor.fetchall()
     return result
