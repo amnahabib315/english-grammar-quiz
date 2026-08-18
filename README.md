@@ -31,7 +31,11 @@ A console-based English Grammar Quiz application built with Python and SQLite.
 - New questions can be added anytime by appending rows to `questions.csv` and re-running `database.py`
 
 **Charts (`charts.py`)**
-- Visualizes accuracy by category and by difficulty using matplotlib bar charts
+- Visualizes performance using matplotlib: accuracy by category (bar), accuracy by difficulty (bar), accuracy over time (line, last 8 days), and correct vs incorrect answers (pie)
+- Color-coded thresholds (green ≥60%, orange 40-59%, red <40%) with an overall average reference line
+- Best/weakest category and difficulty highlighted as a caption on each chart
+- Optional save-to-PNG after viewing any chart
+- Combined "Performance Dashboard" view showing all four charts together in one window
 - Accessed via the "View Performance Charts" submenu in the app
 
 ## Tech Stack
@@ -45,4 +49,4 @@ pip install matplotlib   # required for performance charts
 python database.py   # generates quiz.db, seeds questions from questions.csv
 python main.py       # starts the quiz application
 ```
-**Note:** `quiz.db` may contain a couple of legacy question entries beyond what's in `questions.csv`, kept intentionally because they're referenced by existing logged attempts (removing them would break the foreign key relationship in the `attempts` table).
+
