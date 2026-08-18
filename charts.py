@@ -1,4 +1,4 @@
-from analytics import accuracy_by_category, accuracy_by_difficulty,accuracy_by_date
+import analytics 
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 import textwrap
@@ -8,7 +8,7 @@ import textwrap
 CATEGORY_ORDER = {"Tenses": 0, "Parts of Speech": 1, "Subject-Verb Agreement": 2, "Common Errors": 3}
 #we have to define order bcz chart sets them in alphabetical order
 def plot_category_accuracy(db):
-    data = accuracy_by_category(db)
+    data = analytics.accuracy_by_category(db)
     if not data:
         print("\nNo data yet — take a quiz first!")
         return
@@ -108,7 +108,7 @@ def plot_category_accuracy(db):
 
 DIFFICULTY_ORDER = {"easy": 0, "medium": 1, "hard": 2}    
 def plot_difficulty_accuracy(db):
-    data = accuracy_by_difficulty(db)
+    data = analytics.accuracy_by_difficulty(db)
     if not data:
         print("\nNo data yet — take a quiz first!")
         return
@@ -190,7 +190,7 @@ def plot_difficulty_accuracy(db):
             
             
 def plot_accuracy_over_time(db):
-    data=accuracy_by_date(db)
+    data=analytics.accuracy_by_date(db)
     data = list(reversed(data))
     if not data:
         print("\nNo data yet — take a quiz first!")
@@ -227,4 +227,33 @@ def plot_accuracy_over_time(db):
             print("Chart not saved.")
             break
         else:
-            print("Invalid input. Please enter y or n.")  
+            print("Invalid input. Please enter y or n.") 
+
+
+def plot_correct_vs_incorrect(db):
+    total, correct, accuracy = analytics.overall_stats(db)
+    if total == 0:
+        print("\nNo data yet — take a quiz first!")
+        return
+
+    incorrect = total - correct
+    labels = ['Correct', 'Incorrect']
+    values = [correct, incorrect]
+    colors = ['#4CAF50', '#E53935']
+
+    fig, ax = plt.subplots(figsize=(8, 8))
+    ax.pie(values, labels=labels, colors=colors, autopct='%1.1f%%', startangle=90, textprops={'fontsize': 12})
+    ax.set_title("Correct vs Incorrect Answers", fontsize=16, fontweight='bold', pad=20)
+
+    plt.show()
+    while True:
+        save_choice = input("Save this chart as an image? (y/n): ").strip().lower()
+        if save_choice == 'y':
+            plt.savefig("correct_vs_incorrect.png", dpi=150, bbox_inches='tight')
+            print("Chart saved as correct_vs_incorrect.png")
+            break
+        elif save_choice == 'n':
+            print("Chart not saved.")
+            break
+        else:
+            print("Invalid input. Please enter y or n.")
