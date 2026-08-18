@@ -191,6 +191,7 @@ def plot_difficulty_accuracy(db):
             
 def plot_accuracy_over_time(db):
     data=accuracy_by_date(db)
+    data = list(reversed(data))
     if not data:
         print("\nNo data yet — take a quiz first!")
         return
@@ -208,8 +209,9 @@ def plot_accuracy_over_time(db):
     ax.tick_params(axis='x', rotation=0, labelsize=10)
     ax.tick_params(axis='y', labelsize=10)
     avg=sum(accuracies)/len(accuracies)
-    ax.axhline(y=avg, color='blue', linestyle=':', linewidth=1)
-    ax.legend([f'Overall Average: {avg:.1f}%'], loc='upper center', fontsize=8, frameon=False) 
+    avg_line = ax.axhline(y=avg, color='blue', linestyle=':', linewidth=1)
+    fig.legend(handles=[avg_line], labels=[f'Overall Average: {avg:.1f}%'], loc='upper center', ncol=1, 
+    fontsize=8, frameon=False, bbox_to_anchor=(0.5, 0.98))
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False) 
     ax.set_facecolor('#f5f5f5')
