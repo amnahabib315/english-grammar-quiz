@@ -77,53 +77,44 @@ def weakest_category(db):
         return None
 
 def show_report(db):
-    total, correct, accuracy= overall_stats(db)
+    total, correct, accuracy = overall_stats(db)
+    output = ""
+
     if total == 0:
-        print("\nNo quiz attempts recorded yet.")
-        return
-    else:
-        print("\nOverall Quiz Performance:")
-        print(f"Total Questions Attempted: {total}")
-        print(f"Total Correct Answers: {correct}")
-        print(f"Overall Accuracy: {accuracy:.2f}%")
-        
-    category_accuracy=accuracy_by_category(db)
+        return "No quiz attempts recorded yet."
+
+    output += "Overall Quiz Performance:\n"
+    output += f" Total Questions Attempted: {total}\n"
+    output += f" Total Correct Answers: {correct}\n"
+    output += f" Overall Accuracy: {accuracy:.2f}%\n"
+
+    category_accuracy = accuracy_by_category(db)
     for category in category_accuracy:
         cat, total_count, correct_count, accuracy_percentage = category
-        print(f"\nCategory: {cat}")
-        print(f"  Total Questions Attempted: {total_count}")
-        print(f"  Total Correct Answers: {correct_count}")
-        print(f"  Accuracy: {accuracy_percentage:.2f}% {'needs practice' if accuracy_percentage < 60 else 'performing well'}")
-       
-    difficulty_accuracy=accuracy_by_difficulty(db)
+        output += f"\nCategory: {cat}\n"
+        output += f"  Total Questions Attempted: {total_count}\n"
+        output += f"  Total Correct Answers: {correct_count}\n"
+        output += f"  Accuracy: {accuracy_percentage:.2f}% {'needs practice' if accuracy_percentage < 60 else 'performing well'}\n"
+
+    difficulty_accuracy = accuracy_by_difficulty(db)
     for difficulty in difficulty_accuracy:
         diff, total_count, correct_count, accuracy_percentage = difficulty
-        print(f"\nDifficulty: {diff}")
-        print(f"  Total Questions Attempted: {total_count}")
-        print(f"  Total Correct Answers: {correct_count}")
-        print(f"  Accuracy: {accuracy_percentage:.2f}% {'needs practice' if accuracy_percentage < 60 else 'performing well'}")
-        
-    weakest_cat=weakest_category(db)
+        output += f"\nDifficulty: {diff}\n"
+        output += f"  Total Questions Attempted: {total_count}\n"
+        output += f"  Total Correct Answers: {correct_count}\n"
+        output += f"  Accuracy: {accuracy_percentage:.2f}% {'needs practice' if accuracy_percentage < 60 else 'performing well'}\n"
+
+    weakest_cat = weakest_category(db)
     if weakest_cat:
         cat, total_count, correct_count, accuracy_percentage = weakest_cat
-        print(f"\nWeakest Category: {cat}")
-        print(f"  Total Questions Attempted: {total_count}")
-        print(f"  Total Correct Answers: {correct_count}")
-        print(f"  Accuracy: {accuracy_percentage:.2f}% - Focus on this category for improvement.")
+        output += f"\nWeakest Category: {cat}\n"
+        output += f"  Accuracy: {accuracy_percentage:.2f}% - Focus on this category for improvement.\n"
     else:
-        print("\nGreat job! No category is significantly weaker.")
-    print("\nAccuracy of your performance over last few attempts (by date):\n")
-    db.cursor.execute("""
-        SELECT date, 
-               SUM(CASE WHEN is_correct = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS accuracy
-        FROM attempts
-        GROUP BY date
-        ORDER BY date DESC
-        LIMIT 3
-    """)
-    date_accuracy = db.cursor.fetchall()
-    for date, accuracy in reversed(date_accuracy):
-        print(f"  {date}: {accuracy:.2f}%")
+        output += "\nGreat job! No category is significantly weaker than others.\n"
+
+    return output
+#here we changed prit statments to storing everyting in single stringd bcz this will
+#then go to our gui.py  instead of printing to console
 
 def accuracy_by_date(db, limit=8):
     db.cursor.execute("""SELECT date, SUM(is_correct) * 100.0 / COUNT(*) AS accuracy

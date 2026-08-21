@@ -4,11 +4,21 @@ from matplotlib.patches import Patch
 import textwrap
 #Patch is a shape object specifically rectangle/square 
 # exists purely as a visual in matplotli used here for creating a small colored swatch to show in  legend
+from tkinter import messagebox
 
 
 CATEGORY_ORDER = {"Tenses": 0, "Parts of Speech": 1, "Subject-Verb Agreement": 2, "Common Errors": 3}
 #we have to define order bcz chart sets them in alphabetical order
 DIFFICULTY_ORDER = {"easy": 0, "medium": 1, "hard": 2}
+
+
+def save_charts():
+    save_it = messagebox.askyesno("Save Chart", "Save this chart as an image?")
+    if save_it:
+        plt.savefig("category_accuracy.png", dpi=150, bbox_inches='tight')
+        print("Chart saved as category_accuracy.png")
+    else:
+        print("Chart not saved.")
 
 
 def get_color(v):
@@ -110,17 +120,8 @@ def plot_category_accuracy(db, ax=None):
     fig.subplots_adjust(top=0.80, bottom=0.18)
 
     plt.show()
-    while True:
-        save_choice = input("Save this chart as an image? (y/n): ").strip().lower()
-        if save_choice == 'y':
-            plt.savefig("category_accuracy.png", dpi=150, bbox_inches='tight')
-            print("Chart saved as category_accuracy.png")
-            break
-        elif save_choice == 'n':
-            print("Chart not saved.")
-            break
-        else:
-            print("Invalid input. Please enter y or n.")
+    save_charts()  # ask user if they want to save the chart as an image
+
 
 
 def plot_difficulty_accuracy(db, ax=None):
@@ -190,17 +191,7 @@ def plot_difficulty_accuracy(db, ax=None):
     fig.subplots_adjust(top=0.80, bottom=0.18)
 
     plt.show()
-    while True:
-        save_choice = input("Save this chart as an image? (y/n): ").strip().lower()
-        if save_choice == 'y':
-            plt.savefig("difficulty_accuracy.png", dpi=150, bbox_inches='tight')
-            print("Chart saved as difficulty_accuracy.png")
-            break
-        elif save_choice == 'n':
-            print("Chart not saved.")
-            break
-        else:
-            print("Invalid input. Please enter y or n.")
+    save_charts()
 
 
 def plot_accuracy_over_time(db, ax=None):
@@ -241,17 +232,8 @@ def plot_accuracy_over_time(db, ax=None):
     fontsize=8, frameon=False, bbox_to_anchor=(0.5, 0.98))
     fig.subplots_adjust(top=0.80, bottom=0.18)
     plt.show()
-    while True:
-        save_choice = input("Save this chart as an image? (y/n): ").strip().lower()
-        if save_choice == 'y':
-            plt.savefig("accuracy_over_time.png", dpi=150, bbox_inches='tight')
-            print("Chart saved as accuracy_over_time.png")
-            break
-        elif save_choice == 'n':
-            print("Chart not saved.")
-            break
-        else:
-            print("Invalid input. Please enter y or n.")
+    save_charts()
+
 
 
 def plot_correct_vs_incorrect(db, ax=None):
@@ -278,17 +260,7 @@ def plot_correct_vs_incorrect(db, ax=None):
         return
 
     plt.show()
-    while True:
-        save_choice = input("Save this chart as an image? (y/n): ").strip().lower()
-        if save_choice == 'y':
-            plt.savefig("correct_vs_incorrect.png", dpi=150, bbox_inches='tight')
-            print("Chart saved as correct_vs_incorrect.png")
-            break
-        elif save_choice == 'n':
-            print("Chart not saved.")
-            break
-        else:
-            print("Invalid input. Please enter y or n.")
+    save_charts()
 
 
 def show_dashboard(db):
@@ -308,14 +280,4 @@ def show_dashboard(db):
     fig.suptitle("Performance Dashboard", fontsize=18, fontweight='bold')
     fig.subplots_adjust(hspace=0.5, wspace=0.3, top=0.90)
     plt.show()
-    while True:
-            save_choice = input("Save this chart as an image? (y/n): ").strip().lower()
-            if save_choice == 'y':
-                plt.savefig("overall_dashboard.png", dpi=150, bbox_inches='tight')
-                print("Chart saved as overall_dashboard.png")
-                break
-            elif save_choice == 'n':
-                print("Chart not saved.")
-                break
-            else:
-                print("Invalid input. Please enter y or n.")
+    save_charts()
