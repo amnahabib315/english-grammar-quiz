@@ -2,6 +2,8 @@ import tkinter as tk
 from database import Database
 import charts
 from analytics import show_report
+from main import VALID_CATEGORIES
+from tkinter import messagebox
 
 
 class QuizApp:
@@ -22,8 +24,8 @@ class QuizApp:
 
         # one shared button style dict, reused on every button in the app
         self.btn_style = {
-            "width": 25,
-            "font": (self.font_name, 11),
+            "width": 35,
+            "font": (self.font_name, 14), 
             "bg": self.btn_color,
             "fg": "white", #fg is button text color
             "activebackground": "#3E7FCB",
@@ -49,7 +51,7 @@ class QuizApp:
         container.place(relx=0.5, rely=0.5, anchor="center")  
         #relx and rely are used to position the container in the center of the window
         #container is frame that holds all the buttons and labels in the main menu
-        tk.Label(container, text="English Grammar Quiz", font=(self.font_name, 18, "bold"),
+        tk.Label(container, text="English Grammar Quiz", font=(self.font_name, 26, "bold"), 
                  fg=self.title_color, bg=self.bg_color).pack(pady=20)
 
         tk.Button(container, text="Take Quiz", command=self.show_quiz_setup, **self.btn_style).pack(pady=8)
@@ -66,26 +68,26 @@ class QuizApp:
         container = tk.Frame(self.root, bg=self.bg_color)
         container.place(relx=0.5, rely=0.5, anchor="center")
 
-        tk.Label(container, text="Performance Charts", font=(self.font_name, 16, "bold"),
+        tk.Label(container, text="Performance Charts", font=(self.font_name, 26, "bold"),
                  fg=self.title_color, bg=self.bg_color).pack(pady=20)
 
         tk.Button(container, text="Accuracy by Category",
-                  command=lambda: charts.plot_category_accuracy(self.db), **self.btn_style).pack(pady=5)
+                  command=lambda: charts.plot_category_accuracy(self.db), **self.btn_style).pack(pady=7)
         #lambda is comand here to pass the db object to the function plot_category_accuracy when the button is clicked
         tk.Button(container, text="Accuracy by Difficulty",
-                  command=lambda: charts.plot_difficulty_accuracy(self.db), **self.btn_style).pack(pady=5)
+                  command=lambda: charts.plot_difficulty_accuracy(self.db), **self.btn_style).pack(pady=7)
         tk.Button(container, text="Accuracy Over Time",
-                  command=lambda: charts.plot_accuracy_over_time(self.db), **self.btn_style).pack(pady=5)
+                  command=lambda: charts.plot_accuracy_over_time(self.db), **self.btn_style).pack(pady=7)
         tk.Button(container, text="Correct vs Incorrect",
-                  command=lambda: charts.plot_correct_vs_incorrect(self.db), **self.btn_style).pack(pady=5)
+                  command=lambda: charts.plot_correct_vs_incorrect(self.db), **self.btn_style).pack(pady=7)
         tk.Button(container, text="View Full Dashboard",
-                  command=lambda: charts.show_dashboard(self.db), **self.btn_style).pack(pady=5)
+                  command=lambda: charts.show_dashboard(self.db), **self.btn_style).pack(pady=7)    
         #pack and paddy are used to add space between the buttons and the label in the GUI
         tk.Button(container, text="Back to Main Menu", command=self.show_main_menu, **self.btn_style).pack(pady=20)
 
     def show_report_screen(self):
         self.clear_window()
-        tk.Label(self.root, text="Performance Report", font=(self.font_name, 16, "bold"),
+        tk.Label(self.root, text="Performance Report", font=(self.font_name, 26, "bold"),
                  fg=self.title_color, bg=self.bg_color).pack(pady=15)
 
         outer = tk.Frame(self.root, bg=self.bg_color)
@@ -127,9 +129,73 @@ class QuizApp:
 
     def show_quiz_setup(self):
         self.clear_window()
-        # NEEDS: difficulty/category selection as buttons, then hands off
-        # to the actual quiz-taking screen
-        pass
+        container = tk.Frame(self.root, bg=self.bg_color)
+        container.place(relx=0.5, rely=0.5, anchor="center")
+        #container used to center the buttons and label in the middle of the window
+
+        tk.Label(container, text="Choose Difficulty", font=(self.font_name, 26, "bold"),
+                 fg=self.title_color, bg=self.bg_color).pack(pady=15)
+
+        # loop creates one button per difficulty level instead of writing 3 separate lines
+        for level in ["easy", "medium", "hard"]:
+            # l=level freezes the CURRENT loop value into the lambda right now,
+            # otherwise all 3 buttons would end up using whatever "level" is
+            # LAST set to (a common lambda-in-a-loop mistake)
+            tk.Button(container, text=level.capitalize(),
+                      command=lambda l=level: self.select_difficulty(l), **self.btn_style).pack(pady=7)
+
+        tk.Button(container, text="Back to Main Menu", command=self.show_main_menu, **self.btn_style).pack(pady=20)
+
+    def select_difficulty(self, difficulty):
+        # stores the user's choice so later steps (category selection, then
+        # fetching questions) know which difficulty to use
+        self.selected_difficulty = difficulty
+        self.show_category_setup()
+    
+    def start_quiz(self):
+        print("Selected difficulty:", self.selected_difficulty)
+        print("Selected categories:", self.selected_categories)
+    # NEEDS: actually fetch questions and show the first one
+
+    def show_category_setup(self):
+        self.clear_window()
+        container = tk.Frame(self.root, bg=self.bg_color)
+        container.place(relx=0.5, rely=0.5, anchor="center")
+
+        tk.Label(container, text="Choose Categories", font=(self.font_name, 26, "bold"),
+                 fg=self.title_color, bg=self.bg_color).pack(pady=15)
+
+        #tracks which categories are currently selected
+        self.selected_categories = []
+        #keeps a reference to each button so we can change its color when clicked
+        self.category_buttons = {}
+
+        for cat in VALID_CATEGORIES:
+            btn = tk.Button(container, text=cat, command=lambda c=cat: self.toggle_category(c),
+                            **{**self.btn_style, "bg": "white", "fg": "black"})
+            btn.pack(pady=6) #pack is used to add space between buttons and the label
+            self.category_buttons[cat] = btn
+
+        # thin horizontal line to visually separate category choices from the action buttons
+        separator = tk.Frame(container, height=3, bg="#000000", width=300)
+        separator.pack(pady=15)
+
+        tk.Button(container, text="Start Quiz", command=self.start_quiz, **self.btn_style).pack(pady=8)
+        tk.Button(container, text="Back to Main Menu", command=self.show_main_menu, **self.btn_style).pack(pady=5)
+    def toggle_category(self, category):
+        btn = self.category_buttons[category]
+        if category in self.selected_categories:
+            self.selected_categories.remove(category)
+            btn.config(bg="white", fg="black")#config method is used to change the button color
+        else:
+            self.selected_categories.append(category)
+            btn.config(bg=self.btn_color, fg="white")
+    
+    def confirm_exit_quiz(self):
+        confirmed = messagebox.askyesno("Exit Quiz", "Your progress will not be saved. Are you sure you want to exit?")
+        if confirmed:
+            self.show_main_menu()
+    #if they click "No", nothing happens — they stay on the current quiz screen
 
 
 if __name__ == "__main__":
